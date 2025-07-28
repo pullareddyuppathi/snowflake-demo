@@ -47,4 +47,4 @@ jobs:
 
       - name: Run schemachange
         run: |
-          schemachange -f deploy --connection-name my_snowflake_connection --connections-file-path ./connections.toml
+          schemachange -f deploy --connection-name connections --connections-file-path ./connections.toml
