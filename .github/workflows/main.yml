@@ -2,7 +2,7 @@ name: Deploy with schemachange
 
 on:
   push:
-    branches: [main]  # Change this to match your deployment branch
+    branches: [main]  # Update if you use a different deployment branch
 
 jobs:
   deploy:
@@ -41,6 +41,9 @@ jobs:
           database = "${SNOWFLAKE_DATABASE}"
           schema = "${SNOWFLAKE_SCHEMA}"
           EOF
+
+      - name: Set secure file permissions on connections.toml
+        run: chmod 600 connections.toml
 
       - name: Run schemachange
         run: |
