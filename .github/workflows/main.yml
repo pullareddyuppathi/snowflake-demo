@@ -1,47 +1,34 @@
-name: Deploy Snowflake Changes
+name: Deploy with schemachange
 
 on:
-  workflow_dispatch:  # Triggered manually, change this if you want auto triggers.
+  push:
+    branches: [main]  # or your deployment branch
 
 jobs:
-  deploy-snowflake-changes-job:
+  deploy:
     runs-on: ubuntu-latest
 
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+
     steps:
-      # Step 1: Checkout the code
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: 3.8
 
-      # Step 3: Install dependencies (e.g., schemachange)
-      - name: Install dependencies
-        run: |
-          pip install schemachange
+      - name: Install schemachange
+        run: pip install schemachange
 
-      # Step 4: Set up Snowflake credentials and run schemachange
       - name: Run schemachange
-        env:
-          SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}  # Snowflake Account - Add this as a secret in GitHub
-          SF_USERNAME: ${{ secrets.SF_USERNAME }}  # Snowflake Username - Add this as a secret in GitHub
-          SF_ROLE: ${{ secrets.SF_ROLE }}  # Snowflake Role - Add this as a secret in GitHub
-          SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}  # Snowflake Warehouse - Add this as a secret in GitHub
-          SF_DATABASE: ${{ secrets.SF_DATABASE }}  # Snowflake Database - Add this as a secret in GitHub
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}  # Snowflake Password - Add this as a secret in GitHub
-          GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
-          # Output current workspace and Python version
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          python --version
-          
-          # Installing schemachange (if not already installed)
-          echo "Step 1: Installing schemachange"
-          pip install schemachange
-          
-          # Running schemachange to deploy changes
-          echo "Step 2: Running schemachange"
-          schemachange -f $GITHUB_WORKSPACE/deploy -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          schemachange -f deploy --connection my_snowflake_connection
