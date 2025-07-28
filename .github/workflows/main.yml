@@ -2,7 +2,7 @@ name: Deploy with schemachange
 
 on:
   push:
-    branches: [main]  # or your deployment branch
+    branches: [main]  # Change this to match your deployment branch
 
 jobs:
   deploy:
@@ -29,6 +29,19 @@ jobs:
       - name: Install schemachange
         run: pip install schemachange
 
+      - name: Create connections.toml file
+        run: |
+          cat <<EOF > connections.toml
+          [connections.my_snowflake_connection]
+          account = "${SNOWFLAKE_ACCOUNT}"
+          user = "${SNOWFLAKE_USER}"
+          password = "${SNOWFLAKE_PASSWORD}"
+          role = "${SNOWFLAKE_ROLE}"
+          warehouse = "${SNOWFLAKE_WAREHOUSE}"
+          database = "${SNOWFLAKE_DATABASE}"
+          schema = "${SNOWFLAKE_SCHEMA}"
+          EOF
+
       - name: Run schemachange
         run: |
-          schemachange -f deploy --connection my_snowflake_connection
+          schemachange -f deploy --connection-name my_snowflake_connection --connections-file-path ./connections.toml
