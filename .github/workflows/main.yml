@@ -27,14 +27,14 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install schemachange and snowflake connector
+      - name: Install schemachange and Snowflake connector
         run: |
           python -m pip install --upgrade pip
           pip install schemachange snowflake-connector-python
 
-      - name: Create METADATA database and SCHEMACHANGE schema if not exists
+      - name: Ensure METADATA.SCHEMACHANGE exists
         run: |
-          python -c "
+          python <<EOF
 import snowflake.connector
 import os
 
@@ -43,9 +43,9 @@ conn = snowflake.connector.connect(
     password=os.environ['SNOWFLAKE_PASSWORD'],
     account=os.environ['SNOWFLAKE_ACCOUNT'],
     role=os.environ['SNOWFLAKE_ROLE'],
-    warehouse=os.environ['SNOWFLAKE_WAREHOUSE'],
-    database=os.environ['SNOWFLAKE_DATABASE']
+    warehouse=os.environ['SNOWFLAKE_WAREHOUSE']
 )
+
 cs = conn.cursor()
 try:
     cs.execute('CREATE DATABASE IF NOT EXISTS METADATA')
@@ -53,7 +53,7 @@ try:
 finally:
     cs.close()
     conn.close()
-          "
+EOF
 
       - name: Create connections.toml file
         run: |
