@@ -46,7 +46,6 @@ conn = snowflake.connector.connect(
     warehouse=os.environ['SNOWFLAKE_WAREHOUSE'],
     database=os.environ['SNOWFLAKE_DATABASE']
 )
-
 cs = conn.cursor()
 try:
     cs.execute('CREATE DATABASE IF NOT EXISTS METADATA')
